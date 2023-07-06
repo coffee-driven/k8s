@@ -1,0 +1,5 @@
+- name: Provision accounts
+  import_tasks: provision.yml
+  become_user: root
+  become: true
+  no_log: True

@@ -10,6 +10,15 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+data "template_file" "user_data" {
+  template = file("${path.module}/cloud_init.cfg")
+}
+
+resource "libvirt_cloudinit_disk" "commoninit" {
+  name      = "commoninit.iso"
+  user_data = data.template_file.user_data.rendered
+}
+
 resource "libvirt_network" "k8s_network" {
     name = "k8s_network"
     mode = "nat"
@@ -26,7 +35,7 @@ resource "libvirt_network" "k8s_network" {
 
 resource "libvirt_volume" "debian" {
   name   = "debian"
-  source = "https://cloud.debian.org/images/cloud/bullseye/20210814-734/debian-11-nocloud-amd64-20210814-734.qcow2"
+  source = "https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.qcow2"
 }
 
 # volumes to attach to the "workers" domains as main disk
@@ -38,15 +47,24 @@ resource "libvirt_volume" "worker" {
 
 resource "libvirt_domain" "workers" {
     name = "worker_${count.index}"
+    autostart = true
+    cloudinit = libvirt_cloudinit_disk.commoninit.id
     memory = "512"
     vcpu = 1
+    console {
+      type        = "pty"
+      target_port = "0"
+      target_type = "serial"
+      source_path = "/dev/pts/4"
+    }
+    disk {
+        volume_id = element(libvirt_volume.worker[*].id, count.index)   
+    }
     network_interface {
         network_id     = libvirt_network.k8s_network.id
         hostname       = "main"
         wait_for_lease = true
     }
-    disk {
-        volume_id = element(libvirt_volume.worker[*].id, count.index)   
-    }
+
     count = var.workers_count
 }

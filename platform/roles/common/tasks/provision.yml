@@ -1,0 +1,64 @@
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  register: apt_action
+  until: >
+    apt_action is success 
+    or ('Failed to lock apt for exclusive operation' not in apt_action.msg and 
+    '/var/lib/dpkg/lock' not in apt_action.msg)
+  retries: 3
+  delay: 5
+
+- name: Install or update common tools and services
+  ansible.builtin.apt:
+    state: latest
+    pkg:
+      - "{{ item }}"
+  until: >
+    apt_action is success 
+    or ('Failed to lock apt for exclusive operation' not in apt_action.msg 
+    and '/var/lib/dpkg/lock' not in apt_action.msg)
+  retries: 3
+  delay: 5
+  loop: "{{ common_packages }}"
+
+- name: Install dns resolver
+  ansible.builtin.apt:
+    state: latest
+    pkg:
+     - resolvconf
+  until: > 
+    apt_action is success 
+    or ('Failed to lock apt for exclusive operation' not in apt_action.msg 
+    and '/var/lib/dpkg/lock' not in apt_action.msg)
+  retries: 3
+  delay: 5
+
+- name: Configure dns resolver
+  ansible.builtin.lineinfile:
+    path: /etc/resolvconf/resolv.conf.d/tail
+    line: "nameserver 8.8.8.8"
+    owner: root
+    group: root
+    mode: '0640'
+  register: resolver_updated
+
+- name: Update dns resolver
+  ansible.builtin.command: resolvconf -u
+  when: resolver_updated.changed
+
+- name: Remove packages
+  ansible.builtin.apt:
+    state: absent
+    name:
+      - is-dhcp-client
+      - is-dhcp-common
+      - ufw
+  register: apt_action
+  until: >
+    apt_action is success 
+    or ('Failed to lock apt for exclusive operation' not in apt_action.msg 
+    and '/var/lib/dpkg/lock' not in apt_action.msg)
+  retries: 3
+  delay: 5

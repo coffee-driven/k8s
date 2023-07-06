@@ -1,0 +1,51 @@
+{{ ansible_managed }}
+
+Port {{ port | default(22) }}
+ListenAddress {{ address }}
+LogLevel {{ log_level | default('INFO')
+
+AddressFamily inet
+AcceptEnv LANG LC_*
+AllowAgentForwarding yes
+AllowTcpForwarding yes
+AuthorizedKeysCommand none
+AuthorizedKeysCommandUser nobody
+AuthorizedKeysFile	.ssh/authorized_keys
+AuthorizedPrincipalsFile none
+Banner none
+ChrootDirectory none
+ClientAliveCountMax 3
+ClientAliveInterval 15
+Compression delayed
+GatewayPorts no
+GSSAPIAuthentication no
+HostbasedAuthentication no
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+IgnoreRhosts yes
+IgnoreUserKnownHosts no
+KbdInteractiveAuthentication no
+KerberosAuthentication no
+LoginGraceTime 2m
+MaxAuthTries 6
+MaxSessions 10
+MaxStartups 10:30:100
+PasswordAuthentication no
+PermitEmptyPasswords no
+PermitRootLogin no
+PermitTTY yes
+PermitTunnel no
+PermitUserEnvironment no
+PidFile /run/sshd.pid
+PrintLastLog yes
+PrintMotd no
+PubkeyAuthentication yes
+RekeyLimit default none
+StrictModes yes
+SyslogFacility AUTH
+TCPKeepAlive yes
+UseDNS no
+UsePAM yes
+VersionAddendum none
+X11Forwarding no

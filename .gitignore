@@ -2,3 +2,6 @@ infra/.terraform.lock.hcl
 infra/.terraform
 infra/terraform.tfstate.backup
 infra/terraform.tfstate
+infra.code-workspace
+.vault_password
+.ansible_private

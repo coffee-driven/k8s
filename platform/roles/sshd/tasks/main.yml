@@ -1,0 +1,4 @@
+- name: Provision OpenSSH server
+  import_tasks: provision.yml
+  become_user: root
+  become: true

@@ -1,0 +1,25 @@
+common_packages:
+      - bc
+      - bpfcc-tools
+      - bwm-ng
+      - gpg
+      - htop
+      - iptraf
+      - less
+      - lshw
+      - lsof
+      - man
+      - mc
+      - netcat
+      - nmap
+      - python3
+      - rsync
+      - screen
+      - smem
+      - strace
+      - sysstat
+      - tar
+      - tcpdump
+      - telnet
+      - tree
+      - wget

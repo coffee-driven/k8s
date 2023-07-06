@@ -1,0 +1,7 @@
+- name: Tune kernel, set sysctl params
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: "{{ item.state }}"
+    sysctl_set: yes
+  with_items: "{{ sysctlconf }}"   
