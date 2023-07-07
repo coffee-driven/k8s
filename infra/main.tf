@@ -11,7 +11,7 @@ provider "libvirt" {
 }
 
 data "template_file" "user_data" {
-  template = file("${path.module}/cloud_init.cfg")
+  template = file("${path.module}/cloud-init.cfg")
 }
 
 resource "libvirt_cloudinit_disk" "commoninit" {
@@ -35,7 +35,7 @@ resource "libvirt_network" "k8s_network" {
 
 resource "libvirt_volume" "debian" {
   name   = "debian"
-  source = "https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.qcow2"
+  source = "https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2"
 }
 
 # volumes to attach to the "workers" domains as main disk
