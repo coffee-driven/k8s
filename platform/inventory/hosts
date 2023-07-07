@@ -1,0 +1,7 @@
+[platform]
+worker_0
+worker_1
+worker_2
+
+[local]
+localhost

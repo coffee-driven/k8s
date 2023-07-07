@@ -1,0 +1,14 @@
+- name: Get net
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+  - name: Get IPs
+    community.libvirt.virt_net:
+      command: facts
+    register: netfacts
+    delegate_to: localhost
+  - name: Show data
+    debug:
+      msg: "{{ item }}"
+    loop: "{{ netfacts | community.general.json_query('ansible_facts.ansible_libvirt_networks.k8s_network.dhcp_leases[*].ipaddr') }}"
