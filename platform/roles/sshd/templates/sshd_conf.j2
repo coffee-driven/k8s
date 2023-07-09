@@ -1,8 +1,8 @@
-{{ ansible_managed }}
+# {{ ansible_managed }}
 
 Port {{ port | default(22) }}
-ListenAddress {{ address }}
-LogLevel {{ log_level | default('INFO')
+ListenAddress {{ address | default('0.0.0.0') }}
+LogLevel {{ log_level | default('INFO') }}
 
 AddressFamily inet
 AcceptEnv LANG LC_*

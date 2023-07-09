@@ -19,3 +19,5 @@ WIP
 - `systemctl enable serial-getty@ttyS0.service`
 - `systemctl start serial-getty@ttyS0.service`
 
+**!**
+Inventory plugin for libvirt cannot be configured for specific network only. It returns all VMs launched by user!

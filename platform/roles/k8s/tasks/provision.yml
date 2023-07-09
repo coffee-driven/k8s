@@ -1,0 +1,112 @@
+- name: Load Kernel modules for IPv4 forwarding and bridge_nf_call_iptables
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - br_netfilter
+    - overlay
+
+- name: Configure Kernel
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: 1
+    state: present    
+  loop:
+    - "net.bridge.bridge-nf-call-iptables" 
+    - "net.bridge.bridge-nf-call-ip6tables" 
+    - "net.ipv4.ip_forward"
+
+- name: Install support pkgs
+  ansible.builtin.apt:
+    state: latest
+    pkg:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+  register: apt_action
+  until: >
+    apt_action is success 
+    or ('Failed to lock apt for exclusive operation' not in apt_action.msg 
+    and '/var/lib/dpkg/lock' not in apt_action.msg)
+  retries: 3
+  delay: 5
+
+- name: Download Docker signing key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    keyring: /etc/apt/trusted.gpg.d/docker.gpg
+
+- name: Add Docker apt repository
+  ansible.builtin.apt_repository:
+    repo: >
+      deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/docker.gpg]
+      https://download.docker.com/linux/debian
+      bullseye stable
+    filename: "k8s.list"
+    update_cache: true
+
+- name: Install container runtime
+  ansible.builtin.apt:
+    state: latest
+    pkg:
+      - runc
+      - containerd
+  register: apt_action
+  until: >
+    apt_action is success 
+    or ('Failed to lock apt for exclusive operation' not in apt_action.msg 
+    and '/var/lib/dpkg/lock' not in apt_action.msg)
+  retries: 3
+  delay: 5
+
+- name: Create dir for CNI plugins
+  ansible.builtin.file:
+    path: /opt/cni/bin
+    owner: root
+    group: root
+    mode: "0750"
+    state: directory
+
+- name: Download CNI plugins
+  ansible.builtin.get_url:
+    url: >
+      https://github.com/containernetworking/plugins/releases/download/v1.3.0/cni-plugins-linux-amd64-v1.3.0.tgz
+    dest: "/tmp/cni-plugins"
+    checksum: >
+      sha512:5d0324ca8a3c90c680b6e1fddb245a2255582fa15949ba1f3c6bb7323d
+      f9d3af754dae98d6e40ac9ccafb2999c932df2c4288d418949a4915d928eb23c090540
+
+- name: Unpack CNI plugins
+  ansible.builtin.unarchive:
+    src: /tmp/cni-plugins
+    remote_src: yes
+    dest: /opt/cni/bin
+    group: root
+    owner: root
+
+- name: Download Google Cloud public signing key
+  ansible.builtin.apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    keyring: /etc/apt/trusted.gpg.d/k8s.gpg
+
+- name: Add the Kubernetes apt repository - Xenial 
+  ansible.builtin.apt_repository:
+    repo: >
+      deb [signed-by=/etc/apt/trusted.gpg.d/k8s.gpg]
+      https://apt.kubernetes.io/ kubernetes-xenial main
+    filename: "k8s.list"
+    update_cache: true
+
+- name: Install k8s services
+  ansible.builtin.apt:
+    state: latest
+    pkg:
+      - kubeadm
+      - kubectl
+      - kubelet
+  until: >
+    apt_action is success 
+    or ('Failed to lock apt for exclusive operation' not in apt_action.msg 
+    and '/var/lib/dpkg/lock' not in apt_action.msg)
+  retries: 3
+  delay: 5

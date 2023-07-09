@@ -4,13 +4,13 @@
       - sudo
     state: latest
 
-- name: Create group {{ item.group }}
+- name: Create group
   ansible.builtin.group:
     name: "{{ item.group }}"
     state: present
   loop: "{{ users }}"
 
-- name: Create users {{ item.user }}
+- name: Create user
   ansible.builtin.user:
     name: "{{ item.name }}"
     comment: "{{ item.comment }}"
@@ -20,12 +20,12 @@
     # min. Ansible 2.12
     # umask: "007"
     state: present
+    # Always update password!
     password: "{{ item.password | string | password_hash('sha512') }}"
-    update_password: on_create
+    password_lock: false
   loop: "{{ users }}"
-  no_log: True
 
-- name: Create /home/{{ item.name }}/.ssh structure
+- name: Create /home/.ssh dir
   ansible.builtin.file:
     path:  "/home/{{ item.name }}/.ssh"
     state: directory
@@ -34,7 +34,7 @@
     mode: '0750'
   loop: "{{ users }}"
 
-- name: Synchronize public keys for the users - {{ item.name }}
+- name: Synchronize public keys for the user
   ansible.builtin.lineinfile:
     dest: "/home/{{ item.name }}/.ssh/authorized_keys"
     create: yes
@@ -44,7 +44,6 @@
     state: present
   loop: "{{ users }}"
   when: item.public is defined
-  no_log: True
 
 - name: Set up password-less sudo for "sudo" group
   ansible.builtin.lineinfile:
@@ -57,5 +56,5 @@
 - name: Update root password
   ansible.builtin.user:
     name: root
-    password: "{{ root_password | password_hash('sha512') }}"
+    password: "{{ root_password | string | password_hash('sha512') }}"
     state: present
