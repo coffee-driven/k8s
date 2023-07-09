@@ -43,6 +43,7 @@ resource "libvirt_volume" "worker" {
   name           = "worker_${count.index}.qcow2"
   base_volume_id = libvirt_volume.debian.id
   count          = var.workers_count
+  size = "5000000000"
 }
 
 resource "libvirt_domain" "workers" {
@@ -65,6 +66,8 @@ resource "libvirt_domain" "workers" {
         hostname       = "main"
         wait_for_lease = true
     }
+
+    qemu_agent = true
 
     count = var.workers_count
 }
