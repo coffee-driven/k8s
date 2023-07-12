@@ -1,7 +1,7 @@
 - name: Setup platform
   hosts: all
   roles:
-  #  - common 
+    - common 
   #  - user_management
   #  - sshd
     - k8s

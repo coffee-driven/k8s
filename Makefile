@@ -6,10 +6,8 @@ ansible_deb:
 
 infra:
 	@echo "Building infrastructure"
-	cd infra
-	terraform destroy -auto-approve
-	terraform apply -auto-approve
-	cd ../
+	cd infra && terraform destroy -auto-approve
+	cd infra && terraform apply -auto-approve
 
 platform: ansible_deb
 	@echo "Building platform"

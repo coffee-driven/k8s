@@ -71,3 +71,4 @@ resource "libvirt_domain" "workers" {
 
     count = var.workers_count
 }
+  
